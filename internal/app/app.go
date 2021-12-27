@@ -42,6 +42,26 @@ func Run() error {
 
 	promRegistry := prometheus.NewRegistry()
 	promRegistry.MustRegister()
+	_ = prometheus.NewGauge(
+		prometheus.GaugeOpts{
+			Namespace:   "",
+			Subsystem:   "",
+			Name:        "",
+			Help:        "",
+			ConstLabels: map[string]string{},
+		})
+
+	_ = prometheus.NewCounterVec(
+		prometheus.CounterOpts{
+			Namespace:   "",
+			Subsystem:   "",
+			Name:        "",
+			Help:        "",
+			ConstLabels: map[string]string{},
+		},
+		nil,
+	)
+
 	http.Handle("/metrics", promhttp.HandlerFor(promRegistry, promhttp.HandlerOpts{}))
 
 	return fmt.Errorf("app: not implemented")
