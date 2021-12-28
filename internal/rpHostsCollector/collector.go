@@ -36,7 +36,7 @@ type rpHostsCollector struct {
 
 func New(rasapi rascli.Api) prometheus.Collector {
 
-	proccesLabels := []string{"cluster", "pid", "port", "startedAt"}
+	proccesLabels := []string{"cluster", "pid", "host", "port", "startedAt"}
 
 	return &rpHostsCollector{
 		ctx:    context.Background(),
@@ -150,6 +150,7 @@ func (c *rpHostsCollector) funInCollect(ch chan<- prometheus.Metric, clusterInfo
 			proccesLabelsVal []string = []string{
 				clusterInfo.Name,
 				proccesInfo.Pid,
+				fmt.Sprint(proccesInfo.Host),
 				fmt.Sprint(proccesInfo.Port),
 				proccesInfo.StartedAt.Format("2006-01-02 15:04:05"),
 			}
