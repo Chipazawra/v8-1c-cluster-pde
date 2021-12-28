@@ -1,9 +1,9 @@
 package app
 
 type Config struct {
-	Host   string `env:"HOST_1C" envDefault:"localhost"`
-	Port   string `env:"PORT_1C" envDefault:"1545"`
-	User   string `env:"USER_1C"`
-	Pass   string `env:"PASS_1C"`
+	Host   string `env:"RAS_HOST" envDefault:"localhost"`
+	Port   string `env:"RAS_PORT" envDefault:"1545"`
+	User   string `env:"CLS_USER"`
+	Pass   string `env:"CLS_PASS"`
 	Expose string `env:"EXPOSE" envDefault:"9096"`
 }

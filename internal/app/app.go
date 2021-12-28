@@ -1,11 +1,11 @@
 package app
 
 import (
-	"context"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
+	"os"
 
 	"github.com/Chipazawra/v8-1c-cluster-pde/internal/rpHostsCollector"
 	"github.com/caarlos0/env"
@@ -19,13 +19,14 @@ var (
 	hostFlag   string
 	portFlag   string
 	exposeFlag string
-	ctx        context.Context
 )
 
 func init() {
 	if err := env.Parse(&conf); err != nil {
 		log.Fatalf("app: config...")
 	}
+
+	log.SetOutput(os.Stdout)
 
 	flag.StringVar(&hostFlag, "host", "", "cluster host.")
 	flag.StringVar(&portFlag, "port", "", "cluster port.")
@@ -43,15 +44,13 @@ func init() {
 	if exposeFlag != "" {
 		conf.Expose = exposeFlag
 	}
-
-	ctx = context.Background()
-
 }
 
 func Run() error {
 
 	rcli := rascli.NewClient(fmt.Sprintf("%s:%s", conf.Host, conf.Port))
 	rcli.AuthenticateAgent(conf.User, conf.Pass)
+	log.Printf("cluster-pde connected to RAS: %v", fmt.Sprintf("%s:%s", conf.Host, conf.Port))
 	defer rcli.Close()
 
 	promRegistry := prometheus.NewRegistry()
@@ -60,6 +59,8 @@ func Run() error {
 	http.Handle("/metrics",
 		promhttp.HandlerFor(promRegistry, promhttp.HandlerOpts{}),
 	)
+
+	log.Printf("cluster-pde is running on: %v", fmt.Sprintf("%s:%s", "", conf.Expose))
 
 	err := http.ListenAndServe(fmt.Sprintf("%s:%s", "", conf.Expose), nil)
 	if err != nil {

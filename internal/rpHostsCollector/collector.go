@@ -30,11 +30,13 @@ type rpHostsCollector struct {
 	AvgDbCallTime       *prometheus.Desc
 	AvgLockCallTime     *prometheus.Desc
 	AvgServerCallTime   *prometheus.Desc
+	Running             *prometheus.Desc
+	Enable              *prometheus.Desc
 }
 
 func New(rasapi rascli.Api) prometheus.Collector {
 
-	proccesLabels := []string{"cluster", "pid", "port", "enable", "running", "startedAt"}
+	proccesLabels := []string{"cluster", "pid", "port", "startedAt"}
 
 	return &rpHostsCollector{
 		ctx:    context.Background(),
@@ -95,6 +97,14 @@ func New(rasapi rascli.Api) prometheus.Collector {
 			"rp_hosts_avg_server_call_time",
 			"host avg server call time",
 			proccesLabels, nil),
+		Enable: prometheus.NewDesc(
+			"rp_hosts_enable",
+			"host enable",
+			proccesLabels, nil),
+		Running: prometheus.NewDesc(
+			"rp_hosts_running",
+			"host enable",
+			proccesLabels, nil),
 	}
 }
 
@@ -141,8 +151,6 @@ func (c *rpHostsCollector) funInCollect(ch chan<- prometheus.Metric, clusterInfo
 				clusterInfo.Name,
 				proccesInfo.Pid,
 				fmt.Sprint(proccesInfo.Port),
-				fmt.Sprint(proccesInfo.Enable),
-				fmt.Sprint(proccesInfo.Running),
 				proccesInfo.StartedAt.Format("2006-01-02 15:04:05"),
 			}
 		)
@@ -230,7 +238,30 @@ func (c *rpHostsCollector) funInCollect(ch chan<- prometheus.Metric, clusterInfo
 			float64(proccesInfo.AvgServerCallTime),
 			proccesLabelsVal...,
 		)
-
+		ch <- prometheus.MustNewConstMetric(
+			c.Enable,
+			prometheus.GaugeValue,
+			func(fl bool) float64 {
+				if fl {
+					return 1.0
+				} else {
+					return 0.0
+				}
+			}(proccesInfo.Enable),
+			proccesLabelsVal...,
+		)
+		ch <- prometheus.MustNewConstMetric(
+			c.Running,
+			prometheus.GaugeValue,
+			func(fl bool) float64 {
+				if fl {
+					return 1.0
+				} else {
+					return 0.0
+				}
+			}(proccesInfo.Running),
+			proccesLabelsVal...,
+		)
 		rpHostsCount++
 	})
 
