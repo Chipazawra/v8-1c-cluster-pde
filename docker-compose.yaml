@@ -1,0 +1,12 @@
+version: '3.9'
+
+services:
+  app:
+    build: .
+    container_name: app
+    image: app
+    environment:
+      HOST_1C: '192.168.10.233'
+      PORT_1C: '1545'
+    ports:
+      - 9096:9096
