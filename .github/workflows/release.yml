@@ -16,3 +16,4 @@ jobs:
         github_token: ${{ secrets.RELEASE_TOKEN }}
         goos: linux
         goarch: amd64
+        project_path: ./cmd/app/
