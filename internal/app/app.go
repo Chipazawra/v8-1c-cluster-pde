@@ -64,12 +64,8 @@ func Run() error {
 
 	err := http.ListenAndServe(fmt.Sprintf("%s:%s", "", conf.Expose), nil)
 	if err != nil {
-		return Errorf(err)
+		return fmt.Errorf("app: %v", err)
 	}
 
 	return nil
-}
-
-func Errorf(err error) error {
-	return fmt.Errorf("app: %v", err)
 }
