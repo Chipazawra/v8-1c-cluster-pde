@@ -8,7 +8,7 @@ import (
 
 func main() {
 
-	err := app.Run()
+	err := app.RunPusher()
 
 	if err != nil {
 		log.Fatal(err)

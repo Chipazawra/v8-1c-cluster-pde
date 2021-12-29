@@ -1,12 +1,14 @@
 package app
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
 	"net/http"
 	"os"
 
+	pusher "github.com/Chipazawra/v8-1c-cluster-pde/internal/Pusher"
 	"github.com/Chipazawra/v8-1c-cluster-pde/internal/rpHostsCollector"
 	"github.com/caarlos0/env"
 	rascli "github.com/khorevaa/ras-client"
@@ -68,4 +70,18 @@ func Run() error {
 	}
 
 	return nil
+}
+
+func RunPusher() error {
+
+	rcli := rascli.NewClient(fmt.Sprintf("%s:%s", conf.Host, conf.Port))
+	rcli.AuthenticateAgent(conf.User, conf.Pass)
+	log.Printf("cluster-pde connected to RAS: %v", fmt.Sprintf("%s:%s", conf.Host, conf.Port))
+	defer rcli.Close()
+
+	return pusher.New(
+		rpHostsCollector.New(rcli),
+		"pushgateway:9091",
+		pusher.WithInterval(500),
+	).Run(context.Background())
 }
