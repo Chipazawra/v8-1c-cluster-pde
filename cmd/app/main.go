@@ -1,38 +1,16 @@
 package main
 
 import (
-	"context"
 	"log"
 
-	rascli "github.com/khorevaa/ras-client"
-	"github.com/khorevaa/ras-client/serialize"
+	"github.com/Chipazawra/v8-1c-cluster-pde/internal/app"
 )
 
 func main() {
 
-	ctx := context.Background()
-
-	client := rascli.NewClient("192.168.10.233:1545")
-	clusters, err := client.GetClusters(ctx)
+	err := app.Run()
 
 	if err != nil {
-		log.Printf("rac-1c-impl: %s", err)
+		log.Fatal(err)
 	}
-
-	for _, cls := range clusters {
-
-		log.Printf("%v", cls)
-
-		workingProcesses, err := client.GetWorkingProcesses(ctx, cls.UUID)
-
-		if err != nil {
-			log.Printf("rac-1c-impl: %s", err)
-		}
-
-		workingProcesses.Each(func(info *serialize.ProcessInfo) {
-			log.Printf("ProcessInfo: %#v", info)
-		})
-
-	}
-
 }
