@@ -25,7 +25,7 @@ CLS_PASS=<ras pass - если есть>
 docker-compose up
 ```
 
-### Результатом проделанных действий на `http://<host-ip>:3000` или есть вы делали это на своей машине `http://localhost:3000` будет доступна Grafana c demo дабордом:
+### Результатом проделанных действий на `http://<host-ip>:3000` или если вы делали это на своей машине `http://localhost:3000` будет доступна Grafana c demo дашбордом:
 
 ![image](https://user-images.githubusercontent.com/18016416/147658562-322a2f01-61d7-496a-a256-57d11ae6beae.png)
 
