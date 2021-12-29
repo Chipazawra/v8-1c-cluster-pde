@@ -10,7 +10,7 @@ volumes:
 
 services:
   prometheus:
-    image: prom/prometheus:latest
+    image: prom/prometheus:v2.32.1
     container_name: prometheus
     volumes:
       - ./prometheus:/etc/prometheus
@@ -31,7 +31,7 @@ services:
       org.label-schema.group: "monitoring"
 
   grafana:
-    image: grafana/grafana:latest
+    image: grafana/grafana:8.3.3
     container_name: grafana
     volumes:
       - grafana_data:/var/lib/grafana
@@ -54,6 +54,12 @@ services:
     environment:
       - RAS_HOST=${RAS_HOST}
       - RAS_PORT=${RAS_PORT}
+      - CLS_USER=${CLS_USER}
+      - CLS_PASS=${CLS_PASS}
+      - MODE=${MODE}
+      - PUSH_INTERVAL=${PUSH_INTERVAL}
+      - PUSH_HOST=${PUSH_HOST}
+      - PUSH_PORT=${PUSH_PORT}
     restart: unless-stopped
     expose:
       - 9096

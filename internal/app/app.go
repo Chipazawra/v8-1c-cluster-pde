@@ -119,7 +119,8 @@ func RunPuller(rasapi rascli.Api) error {
 }
 
 func RunPusher(rasapi rascli.Api) error {
-	log.Printf("v8-1c-cluster-pde: runing in %v mode", conf.MODE)
+	log.Printf("v8-1c-cluster-pde: runing in %v mode pushgateway %v\n",
+		conf.MODE, fmt.Sprintf("%s:%s", conf.PUSH_HOST, conf.PUSH_PORT))
 	return pusher.New(
 		rpHostsCollector.New(rasapi),
 		fmt.Sprintf("%s:%s", conf.PUSH_HOST, conf.PUSH_PORT),
