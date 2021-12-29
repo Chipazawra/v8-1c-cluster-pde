@@ -25,5 +25,5 @@ docker-compose up
 
 ### Результатом проделанных действий на `http://<host-ip>:3000` или есть вы делали это на своей машине `http://localhost:3000` будет доступна Grafan c demo дабордом:
 
-![image](https://user-images.githubusercontent.com/18016416/147658207-6f03553a-354c-43dd-9ac5-a95accd9bbe9.png)
+![image](https://user-images.githubusercontent.com/18016416/147658562-322a2f01-61d7-496a-a256-57d11ae6beae.png)
 
