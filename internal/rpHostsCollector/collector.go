@@ -152,7 +152,8 @@ func (c *rpHostsCollector) funInCollect(ch chan<- prometheus.Metric, clusterInfo
 				proccesInfo.Pid,
 				fmt.Sprint(proccesInfo.Host),
 				fmt.Sprint(proccesInfo.Port),
-				proccesInfo.StartedAt.Format("2006-01-02 15:04:05"),
+				// lag MSK+3
+				proccesInfo.StartedAt.In(time.UTC).Format("2006-01-02 15:04:05"),
 			}
 		)
 
