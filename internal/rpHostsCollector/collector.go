@@ -264,6 +264,7 @@ func (c *rpHostsCollector) funInCollect(ch chan<- prometheus.Metric, clusterInfo
 			}(proccesInfo.Running),
 			proccesLabelsVal...,
 		)
+
 		rpHostsCount++
 	})
 
