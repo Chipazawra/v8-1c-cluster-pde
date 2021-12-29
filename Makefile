@@ -1,37 +1,26 @@
-export CGO_ENABLED = 0
-BUILD_LDFLAGS="-s -w"
-
-#GOLANGCI_LINT_VERSION := "v1.40.1" # Optional configuration to pinpoint golangci-lint version.
-
-# The head of Makefile determines location of dev-go to include standard targets.
 GO ?= go
-export GO111MODULE = on
 
-ifneq "$(GOFLAGS)" ""
-  $(info GOFLAGS: ${GOFLAGS})
-endif
+# Override in app Makefile to add custom ldflags, example BUILD_LDFLAGS="-s -w"
+BUILD_LDFLAGS ?= ""
 
-ifneq "$(wildcard ./vendor )" ""
-  $(info Using vendor)
-  modVendor =  -mod=vendor
-  ifeq (,$(findstring -mod,$(GOFLAGS)))
-      export GOFLAGS := ${GOFLAGS} ${modVendor}
-  endif
-  ifneq "$(wildcard ./vendor/github.com/bool64/dev)" ""
-  	DEVGO_PATH := ./vendor/github.com/bool64/dev
-  endif
-endif
+# Override in app Makefile to control build target, example BUILD_PKG=./cmd/my-app
+BUILD_PKG ?= .
 
-ifeq ($(DEVGO_PATH),)
-	DEVGO_PATH := $(shell GO111MODULE=on $(GO) list ${modVendor} -f '{{.Dir}}' -m github.com/bool64/dev)
-	ifeq ($(DEVGO_PATH),)
-    	$(info Module github.com/bool64/dev not found, downloading.)
-    	DEVGO_PATH := $(shell export GO111MODULE=on && $(GO) mod tidy && $(GO) list -f '{{.Dir}}' -m github.com/bool64/dev)
-	endif
-endif
+# Override in app Makefile to control build artifact destination.
+BUILD_DIR ?= ./bin
 
+export CGO_ENABLED ?= 0
 
--include ./release-assets.mk
+RELEASE_TARGETS ?= darwin/amd64 darwin/arm64 linux/amd64 linux/arm64 linux/arm32 windows/amd64
 
+## Build and compress binaries for release assets.
+release-assets:
+	@echo "Release targets: $(RELEASE_TARGETS)"
+	@[[ $(RELEASE_TARGETS) == *"darwin/amd64"* ]] && (echo "Building Darwin AMD64 binary" && GOOS=darwin GOARCH=amd64 $(GO) build -ldflags "$(shell bash $(DEVGO_SCRIPTS)/version-ldflags.sh && echo $(BUILD_LDFLAGS))" -o $(BUILD_DIR)/ $(BUILD_PKG) && cd $(BUILD_DIR) && tar zcvf ../darwin_amd64.tar.gz * && rm *) || :
+	@[[ $(RELEASE_TARGETS) == *"darwin/arm64"* ]] && (echo "Building Darwin ARM64 binary" && GOOS=darwin GOARCH=arm64 $(GO) build -ldflags "$(shell bash $(DEVGO_SCRIPTS)/version-ldflags.sh && echo $(BUILD_LDFLAGS))" -o $(BUILD_DIR)/ $(BUILD_PKG) && cd $(BUILD_DIR) && tar zcvf ../darwin_arm64.tar.gz * && rm *) || :
+	@[[ $(RELEASE_TARGETS) == *"linux/amd64"* ]] && (echo "Building Linux AMD64 binary" && GOOS=linux GOARCH=amd64 $(GO) build -ldflags "$(shell bash $(DEVGO_SCRIPTS)/version-ldflags.sh && echo $(BUILD_LDFLAGS))" -o $(BUILD_DIR)/ $(BUILD_PKG) && cd $(BUILD_DIR) && tar zcvf ../linux_amd64.tar.gz * && rm *) || :
+	@[[ $(RELEASE_TARGETS) == *"linux/arm64"* ]] && (echo "Building Linux ARM64 binary" && GOOS=linux GOARCH=arm64 $(GO) build -ldflags "$(shell bash $(DEVGO_SCRIPTS)/version-ldflags.sh && echo $(BUILD_LDFLAGS))" -o $(BUILD_DIR)/ $(BUILD_PKG) && cd $(BUILD_DIR) && tar zcvf ../linux_arm64.tar.gz * && rm *) || :
+	@[[ $(RELEASE_TARGETS) == *"linux/arm32"* ]] && (echo "Building Linux ARM binary" && GOOS=linux GOARCH=arm $(GO) build -ldflags "$(shell bash $(DEVGO_SCRIPTS)/version-ldflags.sh && echo $(BUILD_LDFLAGS))" -o $(BUILD_DIR)/ $(BUILD_PKG) && cd $(BUILD_DIR) && tar zcvf ../linux_arm.tar.gz * && rm *) || :
+	@[[ $(RELEASE_TARGETS) == *"windows/amd64"* ]] && (echo "Building Windows AMD64 binary" && GOOS=windows GOARCH=amd64 $(GO) build -ldflags "$(shell bash $(DEVGO_SCRIPTS)/version-ldflags.sh && echo $(BUILD_LDFLAGS))" -o $(BUILD_DIR)/ $(BUILD_PKG) && cd $(BUILD_DIR) && zip -9 -j ../windows_amd64.zip * && rm *) || :
 
-# Add your custom targets here.
+.PHONY: release-assets
