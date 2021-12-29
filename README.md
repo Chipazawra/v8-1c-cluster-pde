@@ -1,4 +1,6 @@
-1С-RAS Prometheus data exporter(1C-RAS Прометеус экспортер)
+1С-RAS Prometheus data exporter
+========
+1C-RAS Экспортер метрик в Prometheus 
 ========
 Ещё один экспортер метрик для Prometheus с 1C-RAS, не требующий установки 1C-RAC.
 Экспортер работает в двух режимах push и pull.
