@@ -44,3 +44,57 @@ PUSH_INTERVAL - интервал в миллисекундах, с которы�
 PUSH_HOST - хост pushgateway, с которым экпортер отправляет метрики в pushgateway, при запуске через терминал --push-host
 PUSH_PORT - порт pushgateway, с которым экпортер отправляет метрики в pushgateway, при запуске через терминал --push-port
 ```
+
+
+### Экспортируемые метрики:
+```
+//HELP rp_hosts_active count of active rp hosts on cluster
+//TYPE rp_hosts_active gauge
+rp_hosts_active{cluster="Локальный кластер"} 1
+//HELP rp_hosts_available_perfomance available host performance
+//TYPE rp_hosts_available_perfomance gauge
+rp_hosts_available_perfomance{cluster="Локальный кластер",host="192.168.1.1",pid="13552",port="1560",startedAt="2021-12-23 02:25:33"} 100
+//HELP rp_hosts_avg_back_call_time host avg back call time
+//TYPE rp_hosts_avg_back_call_time gauge
+rp_hosts_avg_back_call_time{cluster="Локальный кластер",host="192.168.1.1",pid="13552",port="1560",startedAt="2021-12-23 02:25:33"} 0
+//HELP rp_hosts_avg_call_time host avg call time
+//TYPE rp_hosts_avg_call_time gauge
+rp_hosts_avg_call_time{cluster="Локальный кластер",host="192.168.1.1",pid="13552",port="1560",startedAt="2021-12-23 02:25:33"} 0.42917682026288584
+//HELP rp_hosts_avg_db_call_time host avg db call time
+//TYPE rp_hosts_avg_db_call_time gauge
+rp_hosts_avg_db_call_time{cluster="Локальный кластер",host="192.168.1.1",pid="13552",port="1560",startedAt="2021-12-23 02:25:33"} 0.0513839334863925
+//HELP rp_hosts_avg_lock_call_time host avg lock call time
+//TYPE rp_hosts_avg_lock_call_time gauge
+rp_hosts_avg_lock_call_time{cluster="Локальный кластер",host="192.168.1.1",pid="13552",port="1560",startedAt="2021-12-23 02:25:33"} 0
+//HELP rp_hosts_avg_server_call_time host avg server call time
+//TYPE rp_hosts_avg_server_call_time gauge
+rp_hosts_avg_server_call_time{cluster="Локальный кластер",host="192.168.1.1",pid="13552",port="1560",startedAt="2021-12-23 02:25:33"} 0.3705480961587519
+//HELP rp_hosts_avg_threads average number of client threads
+//TYPE rp_hosts_avg_threads gauge
+rp_hosts_avg_threads{cluster="Локальный кластер",host="192.168.1.1",pid="13552",port="1560",startedAt="2021-12-23 02:25:33"} 3.2406813319453436
+//HELP rp_hosts_capacity host capacity
+//TYPE rp_hosts_capacity gauge
+rp_hosts_capacity{cluster="Локальный кластер",host="192.168.1.1",pid="13552",port="1560",startedAt="2021-12-23 02:25:33"} 1000
+//HELP rp_hosts_connections number of connections to host
+//TYPE rp_hosts_connections gauge
+rp_hosts_connections{cluster="Локальный кластер",host="192.168.1.1",pid="13552",port="1560",startedAt="2021-12-23 02:25:33"} 11
+//HELP rp_hosts_enable host enable
+//TYPE rp_hosts_enable gauge
+rp_hosts_enable{cluster="Локальный кластер",host="192.168.1.1",pid="13552",port="1560",startedAt="2021-12-23 02:25:33"} 1
+//HELP rp_hosts_memory count of active rp hosts on cluster
+//TYPE rp_hosts_memory gauge
+rp_hosts_memory{cluster="Локальный кластер",host="192.168.1.1",pid="13552",port="1560",startedAt="2021-12-23 02:25:33"} 1.501164e+06
+//HELP rp_hosts_memory_excess_time host memory excess time
+//TYPE rp_hosts_memory_excess_time gauge
+rp_hosts_memory_excess_time{cluster="Локальный кластер",host="192.168.1.1",pid="13552",port="1560",startedAt="2021-12-23 02:25:33"} 0
+//HELP rp_hosts_running host enable
+//TYPE rp_hosts_running gauge
+rp_hosts_running{cluster="Локальный кластер",host="192.168.1.1",pid="13552",port="1560",startedAt="2021-12-23 02:25:33"} 1
+//HELP rp_hosts_scrape_duration the time in milliseconds it took to collect the metrics
+//TYPE rp_hosts_scrape_duration gauge
+rp_hosts_scrape_duration 1031
+//HELP rp_hosts_selection_size host selection size
+//TYPE rp_hosts_selection_size gauge
+rp_hosts_selection_size{cluster="Локальный кластер",host="192.168.1.1",pid="13552",port="1560",startedAt="2021-12-23 02:25:33"} 297924
+```
+```
