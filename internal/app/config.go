@@ -1,9 +1,13 @@
 package app
 
 type Config struct {
-	Host   string `env:"RAS_HOST" envDefault:"localhost"`
-	Port   string `env:"RAS_PORT" envDefault:"1545"`
-	User   string `env:"CLS_USER"`
-	Pass   string `env:"CLS_PASS"`
-	Expose string `env:"EXPOSE" envDefault:"9096"`
+	RAS_HOST      string `env:"RAS_HOST" envDefault:"localhost"`
+	RAS_PORT      string `env:"RAS_PORT" envDefault:"1545"`
+	CLS_USER      string `env:"CLS_USER"`
+	CLS_PASS      string `env:"CLS_PASS"`
+	PULL_EXPOSE   string `env:"PULL_EXPOSE" envDefault:"9096"`
+	MODE          string `env:"MODE" envDefault:"pull"`
+	PUSH_INTERVAL int    `env:"PUSH_INTERVAL" envDefault:"500"`
+	PUSH_HOST     string `env:"PUSH_HOST" envDefault:"localhost"`
+	PUSH_PORT     string `env:"PUSH_PORT" envDefault:"9091"`
 }
