@@ -7,7 +7,6 @@ import (
 )
 
 func main() {
-
 	err := app.Run()
 
 	if err != nil {

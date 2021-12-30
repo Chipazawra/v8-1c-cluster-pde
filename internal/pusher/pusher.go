@@ -37,46 +37,44 @@ func WithJobName(Name string) PusherOption {
 	}
 }
 
-func New(collector prometheus.Collector, url string, opts ...PusherOption) *Pusher {
+func WithConfig(config PusherConfig) PusherOption {
+	return func(p *Pusher) {
+		p.url = fmt.Sprintf("%s:%s", config.PUSH_HOST, config.PUSH_PORT)
+		p.intervalMillis = config.PUSH_INTERVAL
+	}
+}
+
+func New(collector prometheus.Collector, opts ...PusherOption) *Pusher {
 
 	p := &Pusher{
-		collector:      collector,
-		intervalMillis: defaultIntervalMillis,
-		url:            url,
-		jobName:        defaultJobname,
+		collector: collector,
+		jobName:   defaultJobname,
 	}
 
 	for _, opt := range opts {
 		opt(p)
 	}
 
-	p.pusher = push.New(url, p.jobName).Collector(collector)
+	p.pusher = push.New(p.url, p.jobName).Collector(collector)
 
 	return p
 }
 
-func (p *Pusher) Run(ctx context.Context) error {
-
+func (p *Pusher) Run(ctx context.Context, errchan chan<- error) {
+	log.Printf("v8-1c-cluster-pde: pusher %v", p.url)
 	ticker := time.NewTicker(time.Duration(p.intervalMillis * int(time.Microsecond)))
-	done := make(chan error)
-	go func(done chan error) {
-	Loop:
-		for {
-			select {
-			case <-ticker.C:
-				err := p.pusher.Push()
-				if err != nil {
-					done <- fmt.Errorf("puser: %v", err)
-					break Loop
-				}
-			case <-ctx.Done():
-				log.Println("INFO: pusher context complete")
-				done <- nil
+Loop:
+	for {
+		select {
+		case <-ticker.C:
+			err := p.pusher.Push()
+			if err != nil {
+				errchan <- fmt.Errorf("puser: %v", err)
 				break Loop
 			}
+		case <-ctx.Done():
+			log.Println("INFO: pusher context done")
+			break Loop
 		}
-		close(done)
-	}(done)
-
-	return <-done
+	}
 }
