@@ -5,17 +5,15 @@ import (
 	"flag"
 	"fmt"
 	"log"
-	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 
+	"github.com/Chipazawra/v8-1c-cluster-pde/internal/puller"
 	pusher "github.com/Chipazawra/v8-1c-cluster-pde/internal/pusher"
 	"github.com/Chipazawra/v8-1c-cluster-pde/internal/rpHostsCollector"
 	"github.com/caarlos0/env"
 	rascli "github.com/khorevaa/ras-client"
-	"github.com/prometheus/client_golang/prometheus"
-	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 const (
@@ -24,11 +22,11 @@ const (
 )
 
 var (
-	conf          Config
+	conf          AppConfig
 	RAS_HOST      string
 	RAS_PORT      string
-	PULL_EXPOSE   string
 	MODE          string
+	PULL_EXPOSE   string
 	PUSH_INTERVAL int
 	PUSH_HOST     string
 	PUSH_PORT     string
@@ -92,6 +90,8 @@ func Run() error {
 		fmt.Sprintf("%s:%s", conf.RAS_HOST, conf.RAS_PORT),
 	)
 
+	rhc := rpHostsCollector.New(rcli)
+
 	ctx, cancel := context.WithCancel(context.Background())
 
 	sigchan := make(chan os.Signal, 1)
@@ -101,16 +101,25 @@ func Run() error {
 
 	signal.Notify(sigchan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
+	var collecter Collecter
+
 	switch conf.MODE {
 	case push:
-		go RunPusher(ctx, errchan, rcli)
+		collecter = pusher.New(rhc, pusher.WithConfig(
+			pusher.PusherConfig{
+				PUSH_INTERVAL: conf.PUSH_INTERVAL,
+				PUSH_HOST:     conf.PUSH_HOST,
+				PUSH_PORT:     conf.PUSH_PORT,
+			}))
 	case pull:
-		go RunPuller(ctx, errchan, rcli)
-	default:
-		{
-			errchan <- fmt.Errorf("v8-1c-cluster-pde: %v", "undefined mode")
-		}
+		collecter = puller.New(rhc, puller.WithConfig(
+			puller.PullerConfig{
+				PULL_EXPOSE: conf.PULL_EXPOSE,
+			}))
 	}
+
+	log.Printf("v8-1c-cluster-pde: runing in %v mode", conf.MODE)
+	go collecter.Run(ctx, errchan)
 
 	select {
 	case sig := <-sigchan:
@@ -123,45 +132,6 @@ func Run() error {
 	}
 }
 
-func RunPuller(ctx context.Context, errchan chan<- error, rasapi rascli.Api) {
-
-	log.Printf("v8-1c-cluster-pde: runing in %v mode", conf.MODE)
-	promRegistry := prometheus.NewRegistry()
-	promRegistry.MustRegister(rpHostsCollector.New(rasapi))
-
-	mux := http.NewServeMux()
-	mux.Handle("/metrics",
-		promhttp.HandlerFor(promRegistry, promhttp.HandlerOpts{}),
-	)
-	srv := http.Server{
-		Addr:    fmt.Sprintf("%s:%s", "", conf.PULL_EXPOSE),
-		Handler: mux,
-	}
-
-	go func() {
-		errchan <- srv.ListenAndServe()
-	}()
-	log.Printf("v8-1c-cluster-pde: listen %v", fmt.Sprintf("%s:%s", "", conf.PULL_EXPOSE))
-
-	<-ctx.Done()
-
-	if err := srv.Shutdown(context.Background()); err != nil {
-		errchan <- fmt.Errorf("v8-1c-cluster-pde: server shutdown with err: %v", err)
-	}
-	log.Printf("v8-1c-cluster-pde: server shutdown")
-}
-
-func RunPusher(ctx context.Context, errchan chan<- error, rasapi rascli.Api) {
-	log.Printf("v8-1c-cluster-pde: runing in %v mode %v\n",
-		conf.MODE, fmt.Sprintf("%s:%s", conf.PUSH_HOST, conf.PUSH_PORT))
-
-	go pusher.New(
-		rpHostsCollector.New(rasapi),
-		fmt.Sprintf("%s:%s", conf.PUSH_HOST, conf.PUSH_PORT),
-		pusher.WithInterval(500),
-	).Run(ctx, errchan)
-}
-
-type RASCollector interface {
-	Run(ctx context.Context, errchan chan<- error, rasapi rascli.Api)
+type Collecter interface {
+	Run(ctx context.Context, errchan chan<- error)
 }
