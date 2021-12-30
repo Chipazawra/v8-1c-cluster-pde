@@ -55,28 +55,21 @@ func New(collector prometheus.Collector, url string, opts ...PusherOption) *Push
 	return p
 }
 
-func (p *Pusher) Run(ctx context.Context) error {
+func (p *Pusher) Run(ctx context.Context, errchan chan<- error) {
 
 	ticker := time.NewTicker(time.Duration(p.intervalMillis * int(time.Microsecond)))
-	done := make(chan error)
-	go func(done chan error) {
-	Loop:
-		for {
-			select {
-			case <-ticker.C:
-				err := p.pusher.Push()
-				if err != nil {
-					done <- fmt.Errorf("puser: %v", err)
-					break Loop
-				}
-			case <-ctx.Done():
-				log.Println("INFO: pusher context complete")
-				done <- nil
+Loop:
+	for {
+		select {
+		case <-ticker.C:
+			err := p.pusher.Push()
+			if err != nil {
+				errchan <- fmt.Errorf("puser: %v", err)
 				break Loop
 			}
+		case <-ctx.Done():
+			log.Println("INFO: pusher context done")
+			break Loop
 		}
-		close(done)
-	}(done)
-
-	return <-done
+	}
 }

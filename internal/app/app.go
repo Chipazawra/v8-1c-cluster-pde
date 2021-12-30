@@ -96,16 +96,16 @@ func Run() error {
 
 	sigchan := make(chan os.Signal, 1)
 	defer close(sigchan)
-	errchan := make(chan error, 1)
+	errchan := make(chan error)
 	defer close(errchan)
 
 	signal.Notify(sigchan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
 
 	switch conf.MODE {
 	case push:
-		go RunPusher_(ctx, errchan, rcli)
+		go RunPusher(ctx, errchan, rcli)
 	case pull:
-		go RunPuller_(ctx, errchan, rcli)
+		go RunPuller(ctx, errchan, rcli)
 	default:
 		{
 			cancel()
@@ -121,37 +121,7 @@ func Run() error {
 	return <-errchan
 }
 
-func RunPuller(rasapi rascli.Api) error {
-
-	log.Printf("v8-1c-cluster-pde: runing in %v mode", conf.MODE)
-	promRegistry := prometheus.NewRegistry()
-	promRegistry.MustRegister(rpHostsCollector.New(rasapi))
-
-	http.Handle("/metrics",
-		promhttp.HandlerFor(promRegistry, promhttp.HandlerOpts{}),
-	)
-
-	log.Printf("v8-1c-cluster-pde: listen %v", fmt.Sprintf("%s:%s", "", conf.PULL_EXPOSE))
-
-	err := http.ListenAndServe(fmt.Sprintf("%s:%s", "", conf.PULL_EXPOSE), nil)
-	if err != nil {
-		return fmt.Errorf("app: %v", err)
-	}
-
-	return nil
-}
-
-func RunPusher(rasapi rascli.Api) error {
-	log.Printf("v8-1c-cluster-pde: runing in %v mode pushgateway %v\n",
-		conf.MODE, fmt.Sprintf("%s:%s", conf.PUSH_HOST, conf.PUSH_PORT))
-	return pusher.New(
-		rpHostsCollector.New(rasapi),
-		fmt.Sprintf("%s:%s", conf.PUSH_HOST, conf.PUSH_PORT),
-		pusher.WithInterval(500),
-	).Run(context.Background())
-}
-
-func RunPuller_(ctx context.Context, errchan chan<- error, rasapi rascli.Api) {
+func RunPuller(ctx context.Context, errchan chan<- error, rasapi rascli.Api) {
 
 	log.Printf("v8-1c-cluster-pde: runing in %v mode", conf.MODE)
 	promRegistry := prometheus.NewRegistry()
@@ -179,13 +149,13 @@ func RunPuller_(ctx context.Context, errchan chan<- error, rasapi rascli.Api) {
 	log.Printf("v8-1c-cluster-pde: server shutdown")
 }
 
-func RunPusher_(ctx context.Context, errchan chan<- error, rasapi rascli.Api) {
+func RunPusher(ctx context.Context, errchan chan<- error, rasapi rascli.Api) {
 	log.Printf("v8-1c-cluster-pde: runing in %v mode pushgateway %v\n",
 		conf.MODE, fmt.Sprintf("%s:%s", conf.PUSH_HOST, conf.PUSH_PORT))
 
-	errchan <- pusher.New(
+	go pusher.New(
 		rpHostsCollector.New(rasapi),
 		fmt.Sprintf("%s:%s", conf.PUSH_HOST, conf.PUSH_PORT),
 		pusher.WithInterval(500),
-	).Run(ctx)
+	).Run(ctx, errchan)
 }
