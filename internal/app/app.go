@@ -108,17 +108,19 @@ func Run() error {
 		go RunPuller(ctx, errchan, rcli)
 	default:
 		{
-			cancel()
-			return fmt.Errorf("v8-1c-cluster-pde: %v", "undefined mode")
+			errchan <- fmt.Errorf("v8-1c-cluster-pde: %v", "undefined mode")
 		}
 	}
 
-	log.Printf("v8-1c-cluster-pde: received signal %v",
-		<-sigchan,
-	)
-	cancel()
-
-	return <-errchan
+	select {
+	case sig := <-sigchan:
+		cancel()
+		log.Printf("v8-1c-cluster-pde: received signal %v", sig)
+		return nil
+	case err := <-errchan:
+		cancel()
+		return err
+	}
 }
 
 func RunPuller(ctx context.Context, errchan chan<- error, rasapi rascli.Api) {
@@ -150,7 +152,7 @@ func RunPuller(ctx context.Context, errchan chan<- error, rasapi rascli.Api) {
 }
 
 func RunPusher(ctx context.Context, errchan chan<- error, rasapi rascli.Api) {
-	log.Printf("v8-1c-cluster-pde: runing in %v mode pushgateway %v\n",
+	log.Printf("v8-1c-cluster-pde: runing in %v mode %v\n",
 		conf.MODE, fmt.Sprintf("%s:%s", conf.PUSH_HOST, conf.PUSH_PORT))
 
 	go pusher.New(
@@ -158,4 +160,8 @@ func RunPusher(ctx context.Context, errchan chan<- error, rasapi rascli.Api) {
 		fmt.Sprintf("%s:%s", conf.PUSH_HOST, conf.PUSH_PORT),
 		pusher.WithInterval(500),
 	).Run(ctx, errchan)
+}
+
+type RASCollector interface {
+	Run(ctx context.Context, errchan chan<- error, rasapi rascli.Api)
 }
