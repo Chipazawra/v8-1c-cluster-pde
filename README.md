@@ -1,8 +1,8 @@
-[1C-RAS](https://infostart.ru/1c/articles/810752/) Prometheus data exporter
+1С-RAS Prometheus data exporter
 ========
-[1C-RAS](https://infostart.ru/1c/articles/810752/) Экспортер метрик в Prometheus 
+1C-RAS Экспортер метрик в Prometheus 
 ========
-Ещё один экспортер метрик для Prometheus с [1C-RAS](https://infostart.ru/1c/articles/810752/), не требующий установки [1C-RAS](https://infostart.ru/1c/articles/810752/) благодаря пакету https://github.com/khorevaa/ras-client.
+Ещё один экспортер метрик для Prometheus с 1C-RAS, не требующий установки 1C-RAC благодаря пакету https://github.com/khorevaa/ras-client.
 Экспортер работает в двух режимах push и pull.
 Для работы в режиме push требуется pushgateway в таргетах Prometheus. 
 На текущий момент экспортируются показатели запущеных rpHosts.
