@@ -14,6 +14,8 @@ import (
 
 type rpHostsCollector struct {
 	ctx                 context.Context
+	clsuser             string
+	clspass             string
 	wg                  sync.WaitGroup
 	rasapi              rascli.Api
 	rpHosts             *prometheus.Desc
@@ -34,11 +36,20 @@ type rpHostsCollector struct {
 	Enable              *prometheus.Desc
 }
 
-func New(rasapi rascli.Api) prometheus.Collector {
+type opt func(*rpHostsCollector)
+
+func WithCredentionals(clsuser, clspass string) opt {
+	return func(c *rpHostsCollector) {
+		c.clsuser = clsuser
+		c.clspass = clspass
+	}
+}
+
+func New(rasapi rascli.Api, opts ...opt) prometheus.Collector {
 
 	proccesLabels := []string{"cluster", "pid", "host", "port", "startedAt"}
 
-	return &rpHostsCollector{
+	rpc := rpHostsCollector{
 		ctx:    context.Background(),
 		rasapi: rasapi,
 		rpHosts: prometheus.NewDesc(
@@ -106,6 +117,12 @@ func New(rasapi rascli.Api) prometheus.Collector {
 			"host enable",
 			proccesLabels, nil),
 	}
+
+	for _, opt := range opts {
+		opt(&rpc)
+	}
+
+	return &rpc
 }
 
 func (c *rpHostsCollector) Describe(ch chan<- *prometheus.Desc) {
@@ -123,6 +140,7 @@ func (c *rpHostsCollector) Collect(ch chan<- prometheus.Metric) {
 
 	for _, сluster := range сlusters {
 		c.wg.Add(1)
+		c.rasapi.AuthenticateCluster(сluster.UUID, c.clsuser, c.clspass)
 		go c.funInCollect(ch, *сluster)
 	}
 	c.wg.Wait()

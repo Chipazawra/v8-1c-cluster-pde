@@ -30,6 +30,10 @@ var (
 	PUSH_INTERVAL int
 	PUSH_HOST     string
 	PUSH_PORT     string
+	AGNT_PASS     string
+	AGNT_USER     string
+	CLS_USER      string
+	CLS_PASS      string
 )
 
 func init() {
@@ -47,6 +51,10 @@ func init() {
 	flag.IntVar(&PUSH_INTERVAL, "push-interval", 0, "mode push or pull")
 	flag.StringVar(&PUSH_HOST, "push-host", "", "pushgateway host")
 	flag.StringVar(&PUSH_PORT, "push-port", "", "pushgateway port")
+	flag.StringVar(&AGNT_USER, "agnt-user", "", "agent user")
+	flag.StringVar(&AGNT_PASS, "agnt-pass", "", "agent password")
+	flag.StringVar(&CLS_USER, "cls-user", "", "cluster user")
+	flag.StringVar(&CLS_PASS, "cls-pass", "", "cluster password")
 	flag.Parse()
 
 	if RAS_HOST != "" {
@@ -77,20 +85,39 @@ func init() {
 		conf.PUSH_PORT = PUSH_PORT
 	}
 
+	if AGNT_USER != "" {
+		conf.AGNT_USER = AGNT_USER
+	}
+
+	if AGNT_PASS != "" {
+		conf.AGNT_PASS = AGNT_PASS
+	}
+
+	if CLS_USER != "" {
+		conf.CLS_USER = CLS_USER
+	}
+
+	if CLS_PASS != "" {
+		conf.CLS_PASS = CLS_PASS
+	}
+
 	log.Printf("v8-1c-cluster-pde: overrided config from stdin:\n%#v", conf)
 }
 
 func Run() error {
 
 	rcli := rascli.NewClient(fmt.Sprintf("%s:%s", conf.RAS_HOST, conf.RAS_PORT))
-	rcli.AuthenticateAgent(conf.CLS_USER, conf.CLS_PASS)
+	rcli.AuthenticateAgent(conf.AGNT_USER, conf.AGNT_USER)
+
 	defer rcli.Close()
 
 	log.Printf("v8-1c-cluster-pde: connected to RAS %v",
 		fmt.Sprintf("%s:%s", conf.RAS_HOST, conf.RAS_PORT),
 	)
 
-	rhc := rpHostsCollector.New(rcli)
+	rhc := rpHostsCollector.New(rcli,
+		rpHostsCollector.WithCredentionals(conf.CLS_USER, conf.CLS_PASS),
+	)
 
 	ctx, cancel := context.WithCancel(context.Background())
 

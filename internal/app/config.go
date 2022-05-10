@@ -5,6 +5,8 @@ type AppConfig struct {
 	RAS_PORT      string `env:"RAS_PORT" envDefault:"1545"`
 	CLS_USER      string `env:"CLS_USER"`
 	CLS_PASS      string `env:"CLS_PASS"`
+	AGNT_USER     string `env:"AGNT_USER"`
+	AGNT_PASS     string `env:"AGNT_PASS"`
 	MODE          string `env:"MODE" envDefault:"pull"`
 	PUSH_INTERVAL int    `env:"PUSH_INTERVAL" envDefault:"500"`
 	PUSH_HOST     string `env:"PUSH_HOST" envDefault:"localhost"`
