@@ -17,6 +17,8 @@ git clone https://github.com/Chipazawra/v8-1c-cluster-pde
 ```
 RAS_HOST=<ras host>
 RAS_PORT=<ras port>
+AGNT_USER=<ras user - если есть>
+AGNT_PASS=<ras pass - если есть>
 CLS_USER=<ras user - если есть>
 CLS_PASS=<ras pass - если есть>
 ```
@@ -33,8 +35,10 @@ docker-compose up
 ```
 RAS_HOST - хост где запущен 1С-RAS, при запуске через терминал --ras-host
 RAS_PORT - порт где запущен 1С-RAS, при запуске через терминал --ras-port
-CLS_USER - пользователь 1С-RAS
-CLS_PASS - пароль пользователя 1С-RAS
+CLS_USER - администратор кластера 1С, при запуске через терминал --cls-user
+CLS_PASS - пароль администратора кластера 1С, при запуске через терминал --cls-pass
+AGNT_USER - администратор агента 1С, при запуске через терминал --agnt-pass
+AGNT_PASS - пароль администратор агента 1С, при запуске через терминал --agnt-pass
 MODE - режим работы экспортера принимает 2 значения push/pull 
 PULL_EXPOSE - порт хоста на котором запущен экспортер `http://<host>:<PULL_EXPOSE>/metrics`, при запуске через терминал --pull-expose. Имеет смысл только в режиме pull
 
